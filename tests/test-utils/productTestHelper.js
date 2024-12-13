@@ -1,6 +1,7 @@
 const fs = require('fs/promises');
 const { create: createProduct, destroy } = require('../../products');
 const { create: createOrder } = require('../../orders');
+const { log } = require('console');
 
 const productTestHelper = {
   testProductIds: [],
@@ -22,7 +23,9 @@ const productTestHelper = {
   },
 
   async cleanupTestData() {
+    
     console.log('Cleaning up test products...');
+    log(this.testProductIds);
     for (const productId of this.testProductIds) {
       await destroy(productId);
     }
