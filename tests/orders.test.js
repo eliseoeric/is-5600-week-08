@@ -21,7 +21,8 @@ describe('Orders Module', () => {
 
   afterAll(async () => {
     // await productTestHelper.cleanupTestData();
-    log('Orders Module Tests Complete');
+    await productTestHelper.cleanupTestData1();
+    
   });
 
 
