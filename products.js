@@ -1,5 +1,5 @@
-const cuid = require('cuid')
-const db = require('./db')
+const cuid = require('cuid');
+const db = require('./db');
 
 // Define our Product Model
 const Product = db.model('Product', {
@@ -26,7 +26,14 @@ const Product = db.model('Product', {
   tags: [{
     title: { type: String, required: true },
   }],
-})
+});
+
+/**
+ * Delete all products (useful for cleanup between tests)
+ */
+async function deleteAll() {
+  return Product.deleteMany({});
+}
 
 /**
  * List products
@@ -34,23 +41,22 @@ const Product = db.model('Product', {
  * @returns 
  */
 async function list(options = {}) {
-
   const { offset = 0, limit = 25, tag } = options;
 
   const query = tag ? {
     tags: {
       $elemMatch: {
-        title: tag
+        title: tag,
       }
     }
-  } : {}
+  } : {};
 
   const products = await Product.find(query)
     .sort({ _id: 1 })
     .skip(offset)
-    .limit(limit)
+    .limit(limit);
 
-  return products
+  return products;
 }
 
 /**
@@ -59,29 +65,45 @@ async function list(options = {}) {
  * @returns {Promise<object>}
  */
 async function get(_id) {
-  const product = await Product.findById(_id)
-  return product
+  const product = await Product.findById(_id);
+  return product;
 }
 
+/**
+ * Create a product
+ * @param {Object} fields
+ * @returns {Promise<Object>}
+ */
 async function create(fields) {
-  const product = await new Product(fields).save()
-  return product
+  const product = await new Product(fields).save();
+  return product;
 }
 
+/**
+ * Edit a product
+ * @param {string} _id
+ * @param {Object} change
+ * @returns {Promise<Object>}
+ */
 async function edit(_id, change) {
-  const product = await get(_id)
+  const product = await get(_id);
 
   Object.keys(change).forEach(function(key) {
-    product[key] = change[key]
-  })
+    product[key] = change[key];
+  });
 
-  await product.save()
+  await product.save();
 
-  return product
+  return product;
 }
 
+/**
+ * Destroy a product by ID
+ * @param {string} _id
+ * @returns {Promise<Object>}
+ */
 async function destroy(_id) {
-  return await Product.deleteOne({ _id })
+  return await Product.deleteOne({ _id });
 }
 
 module.exports = {
@@ -89,5 +111,6 @@ module.exports = {
   create,
   edit,
   destroy,
-  get
-}
+  get,
+  deleteAll, 
+};

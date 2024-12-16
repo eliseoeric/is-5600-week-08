@@ -1,6 +1,6 @@
 const fs = require('fs/promises');
-const { create: createProduct, destroy } = require('../../products');
-const { create: createOrder } = require('../../orders');
+const { create: createProduct, destroy: destroyProduct, deleteAll: deleteAllProducts } = require('../../products');
+const { create: createOrder, destroy: destroyOrder, deleteAll: deleteAllOrders } = require('../../orders');
 
 const productTestHelper = {
   testProductIds: [],
@@ -8,30 +8,45 @@ const productTestHelper = {
 
   async setupTestData() {
     console.log('Loading test products...');
+
+    // Step 1: Clear all existing test products and orders
+    await this.cleanupTestData();
+
+    // Step 2: Load and insert test products
     const data = await fs.readFile('data/full-products.json', 'utf-8');
     const testProducts = JSON.parse(data);
 
     for (const product of testProducts) {
       if (!product.price) {
-        product.price = Math.floor(Math.random() * 100) + 1;
+        product.price = Math.floor(Math.random() * 100) + 1; // Assign random price
       }
       const createdProduct = await createProduct(product);
-      this.testProductIds.push(createdProduct.id); // Store the created product's ID
+      this.testProductIds.push(createdProduct.id);
     }
+
     console.log('Test products loaded successfully');
   },
 
   async cleanupTestData() {
     console.log('Cleaning up test products...');
-    for (const productId of this.testProductIds) {
-      await destroy(productId);
+
+    // Ensure all products and orders are deleted
+    try {
+      await deleteAllProducts(); // Deletes all products from the database
+    } catch (error) {
+      console.error('Error cleaning up products:', error);
     }
 
+    this.testProductIds = []; // Reset stored product IDs
+
     console.log('Cleaning up test orders...');
-    for (const orderId of this.testOrderIds) {
-      // Assuming an `orders.destroy` method exists. Otherwise, implement if needed.
-      await destroy(orderId);
+    try {
+      await deleteAllOrders(); // Deletes all orders from the database
+    } catch (error) {
+      console.error('Error cleaning up orders:', error);
     }
+
+    this.testOrderIds = []; // Reset stored order IDs
 
     console.log('Test products and orders cleaned up successfully');
   },
@@ -41,7 +56,6 @@ const productTestHelper = {
       throw new Error('No test products available. Run setupTestData() first.');
     }
 
-    // Select a random number of products (up to 10)
     const numProducts = Math.floor(Math.random() * 10) + 1;
     const products = [];
 
@@ -50,14 +64,13 @@ const productTestHelper = {
       products.push(this.testProductIds[randomIndex]);
     }
 
-    // Create a new test order
     const orderData = {
       buyerEmail: `test${Date.now()}@example.com`,
       products,
     };
 
     const createdOrder = await createOrder(orderData);
-    this.testOrderIds.push(createdOrder.id); // Store the created order's ID
+    this.testOrderIds.push(createdOrder.id);
     return createdOrder;
   },
 
