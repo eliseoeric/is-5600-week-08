@@ -260,7 +260,7 @@ Next, let's update our `product.test.js` file so that it uses our mocks instead 
 const { mockDb, mockProducts } = require('./db.mock');
 const { list } = require('../products');
 
-// Mock the db module to use our mockDb
+
 jest.mock('../db', () => mockDb);
 
 describe('Product Module', () => {
