@@ -39,3 +39,20 @@ app.put('/orders/:id', api.editOrder)
  */
 module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
 
+describe('get', () => {
+    it('should retrieve a product by id', async () => {
+      // Assume there is a product with id 'abc123'
+      const product = await get('abc123');
+      expect(product).not.toBeNull();
+    });
+  });
+
+  describe('destroy', () => {
+    it('should delete a product', async () => {
+      // Assume there is a product with id 'abc123'
+      await destroy('abc123');
+      const product = await get('abc123');
+      expect(product).toBeNull();
+    });
+  });
+  
