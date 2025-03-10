@@ -64,7 +64,7 @@ async function get(_id) {
 }
 
 async function create(fields) {
-  const product = await new Product(fields).save()
+  const product = await Product.create(fields);
   return product
 }
 
