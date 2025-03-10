@@ -1,6 +1,13 @@
 const fs = require('fs/promises');
 const { create: createProduct, destroy } = require('../../products');
 const { create: createOrder } = require('../../orders');
+const { log } = require('console');
+
+const db = require('../../db'); // Import the db module
+
+// Import the Product and Order models
+const Product = db.model('Product');
+const Order = db.model('Order');
 
 const productTestHelper = {
   testProductIds: [],
@@ -22,7 +29,9 @@ const productTestHelper = {
   },
 
   async cleanupTestData() {
+
     console.log('Cleaning up test products...');
+    log(this.testProductIds);
     for (const productId of this.testProductIds) {
       await destroy(productId);
     }
@@ -33,6 +42,14 @@ const productTestHelper = {
       await destroy(orderId);
     }
 
+    console.log('Test products and orders cleaned up successfully');
+  },
+
+  async cleanupTestData1() {
+    console.log('Cleaning up test products...');
+    await Product.deleteMany({});
+    console.log('Cleaning up test orders...');
+    await Order.deleteMany({});
     console.log('Test products and orders cleaned up successfully');
   },
 
