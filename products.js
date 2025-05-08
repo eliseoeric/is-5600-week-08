@@ -45,6 +45,8 @@ async function list(options = {}) {
     }
   } : {}
 
+
+  // Ensuring the function returns an array
   const products = await Product.find(query)
     .sort({ _id: 1 })
     .skip(offset)
@@ -91,3 +93,39 @@ module.exports = {
   destroy,
   get
 }
+    .exec(); // Using exec to ensure products are returned as an array
+    return products;  // This should return an array of products
+  }
+
+
+  /**
+   * Get a single product
+   * @param {string} id
+   * @returns {Promise<object>}
+   */
+  async function get(_id) {
+    const product = await Product.findById(_id)
+    return product
+  }
+  async function create(fields) {
+    const product = await new Product(fields).save()
+    return product
+  }
+  async function edit(_id, change) {
+    const product = await get(_id)
+    Object.keys(change).forEach(function(key) {
+      product[key] = change[key]
+    })
+    await product.save()
+    return product
+  }
+  async function destroy(_id) {
+    return await Product.deleteOne({ _id })
+  }
+  module.exports = {
+    list,
+    create,
+    edit,
+    destroy,
+    get
+  }
