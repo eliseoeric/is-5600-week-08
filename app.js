@@ -39,3 +39,4 @@ app.put('/orders/:id', api.editOrder)
  */
 module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
 
+module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
