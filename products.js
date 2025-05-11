@@ -43,7 +43,7 @@ async function list(options = {}) {
         title: tag
       }
     }
-  } : {}
+  } : {};
 
   const products = await Product.find(query)
     .sort({ _id: 1 })
@@ -51,6 +51,8 @@ async function list(options = {}) {
     .limit(limit)
 
   return products
+  .exec(); // Using exec to ensure products are returned as an array
+  return products;
 }
 
 /**
