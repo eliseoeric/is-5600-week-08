@@ -1,6 +1,5 @@
 const cuid = require('cuid')
 const db = require('./db')
-
 // Define our Product Model
 const Product = db.model('Product', {
   _id: { type: String, default: cuid },
@@ -27,14 +26,12 @@ const Product = db.model('Product', {
     title: { type: String, required: true },
   }],
 })
-
 /**
  * List products
  * @param {*} options 
  * @returns 
  */
 async function list(options = {}) {
-
   const { offset = 0, limit = 25, tag } = options;
 
   const query = tag ? {
@@ -43,15 +40,17 @@ async function list(options = {}) {
         title: tag
       }
     }
-  } : {}
+  } : {};
 
+  // Ensuring the function returns an array
   const products = await Product.find(query)
     .sort({ _id: 1 })
     .skip(offset)
     .limit(limit)
-
-  return products
+    .exec(); // Using exec to ensure products are returned as an array
+  return products;  // This should return an array of products
 }
+
 
 /**
  * Get a single product
@@ -62,28 +61,21 @@ async function get(_id) {
   const product = await Product.findById(_id)
   return product
 }
-
 async function create(fields) {
   const product = await new Product(fields).save()
   return product
 }
-
 async function edit(_id, change) {
   const product = await get(_id)
-
   Object.keys(change).forEach(function(key) {
     product[key] = change[key]
   })
-
   await product.save()
-
   return product
 }
-
 async function destroy(_id) {
   return await Product.deleteOne({ _id })
 }
-
 module.exports = {
   list,
   create,
