@@ -1,91 +1,50 @@
-const cuid = require('cuid')
+// tests/orders.test.js
+const { create, get, list, edit } = require('../orders');
+const orderData = require('../data/order1.json');
+const productTestHelper = require('./test-utils/productTestHelper');
 
-const db = require('./db')
+describe('Orders Module', () => {
+    let createdOrder;
 
-const Order = db.model('Order', {
-  _id: { type: String, default: cuid },
-  buyerEmail: { type: String, required: true },
-  products: [{
-    type: String,
-    ref: 'Product', // ref will automatically fetch associated products for us
-    index: true,
-    required: true
-  }],
-  status: {
-    type: String,
-    index: true,
-    default: 'CREATED',
-    enum: ['CREATED', 'PENDING', 'COMPLETED']
-  }
-})
+    // Populate the database with dummy data
+    beforeAll(async () => {
+        await productTestHelper.setupTestData();
+        await productTestHelper.createTestOrders(5);
+    });
 
-async function list(options = {}) {
-  const { offset = 0, limit = 25, productId, status } = options;
+    afterAll(async () => {
+        await productTestHelper.cleanupTestData();
+    });
 
-  const productQuery = productId ? {
-    products: productId
-  } : {}
+    describe('list', () => {
+        it('should list orders', async () => {
+            const orders = await list();
+            expect(orders.length).toBeGreaterThan(4);
+        });
+    });
 
-  const statusQuery = status ? {
-    status: status,
-  } : {}
+    describe('create', () => {
+        it('should create an order', async () => {
+            createdOrder = await create(orderData);
+            expect(createdOrder).toBeDefined();
+            expect(createdOrder.buyerEmail).toBe(orderData.buyerEmail);
+        });
+    });
 
-  const query = {
-    ...productQuery,
-    ...statusQuery
-  };
+    describe('get', () => {
+        it('should get an order by id', async () => {
+            const order = await get(createdOrder._id);
+            expect(order).toBeDefined();
+            expect(order._id).toBe(createdOrder._id);
+        });
+    });
 
-  const orders = await Order.find(query)
-    .sort({ _id: 1 })
-    .skip(offset)
-    .limit(limit)
-
-  return orders
-}
-
-
-
-/**
- * Get an order
- * @param {Object} order
- * @returns {Promise<Object>}
- */
-async function get(_id) {
-  // using populate will automatically fetch the associated products.
-  // if you don't use populate, you will only get the product ids
-  const order = await Order.findById(_id)
-    .populate('products')
-    .exec()
-
-  return order
-}
-
-async function edit(_id, change) {
-  const order = await get(_id)
-
-  Object.keys(change).forEach(function(key) {
-    order[key] = change[key]
-  })
-
-  await order.save()
-
-  return order
-}
-
-/**
- * Create an order
- * @param {Object} order
- * @returns {Promise<Object>}
- */
-async function create(fields) {
-  const order = await new Order(fields).save()
-  await order.populate('products')
-  return order
-}
-
-module.exports = {
-  create,
-  get,
-  list,
-  edit
-}
+    describe('edit', () => {
+        it('should edit an order', async () => {
+            const change = { status: 'COMPLETED' };
+            const editedOrder = await edit(createdOrder._id, change);
+            expect(editedOrder).toBeDefined();
+            expect(editedOrder.status).toBe(change.status);
+        });
+    });
+});
