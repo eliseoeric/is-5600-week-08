@@ -34,7 +34,6 @@ const Product = db.model('Product', {
  * @returns 
  */
 async function list(options = {}) {
-
   const { offset = 0, limit = 25, tag } = options;
 
   const query = tag ? {
@@ -43,15 +42,18 @@ async function list(options = {}) {
         title: tag
       }
     }
-  } : {}
+  } : {};
 
+  // Ensuring the function returns an array
   const products = await Product.find(query)
     .sort({ _id: 1 })
     .skip(offset)
     .limit(limit)
+    .exec(); // Using exec to ensure products are returned as an array
 
-  return products
+  return products;  // This should return an array of products
 }
+
 
 /**
  * Get a single product
