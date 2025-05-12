@@ -45,7 +45,7 @@ async function getProduct(req, res, next) {
   return res.json(product)
 }
 
-/**
+//**
  * Create a product
  * @param {object} req 
  * @param {object} res 
