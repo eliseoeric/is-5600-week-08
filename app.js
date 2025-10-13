@@ -1,41 +1,25 @@
-const express = require('express')
-const api = require('./api')
-const middleware = require('./middleware')
-const bodyParser = require('body-parser')
+// app.js
+const express = require('express');
+const api = require('./api');
+const db = require('./db');
 
-// Set the port
-const port = process.env.PORT || 3000
+const app = express();
+app.use(express.json());
 
-// Boot the app
-const app = express()
+app.get('/', (req, res) => res.status(200).send('OK'));
+app.use('/', api);
 
-// Register the public directory
-app.use(express.static(__dirname + '/public'));
+// Export the app for supertest
+module.exports = app;
 
-// register the routes
-app.use(bodyParser.json())
-app.use(middleware.cors)
-
-// Register root route
-app.get('/', api.handleRoot)
-
-// Register Products routes
-app.get('/products', api.listProducts)
-app.get('/products/:id', api.getProduct)
-app.put('/products/:id', api.editProduct)
-app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
-
-// Register Order Routes
-app.get('/orders', api.listOrders)
-app.post('/orders', api.createOrder)
-// edit and delete routes
-app.put('/orders/:id', api.editOrder)
-
-/**
- * Boot the server.
- * Note that we are exporting the server as well, 
- * so we can use it during our testing
- */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
-
+// Only start server + DB when run directly, not during Jest
+if (require.main === module) {
+  const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/fullstackprints';
+  db.connect(uri).then(() => {
+    const port = process.env.PORT || 3000;
+    app.listen(port, () => console.log(`API listening on ${port}`));
+  }).catch(err => {
+    console.error('DB connection error:', err);
+    process.exit(1);
+  });
+}
