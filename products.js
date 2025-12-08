@@ -89,5 +89,6 @@ module.exports = {
   create,
   edit,
   destroy,
-  get
+  get,
+  Product, 
 }

@@ -1,74 +1,47 @@
-const fs = require('fs/promises');
-const { create: createProduct, destroy } = require('../../products');
-const { create: createOrder } = require('../../orders');
+// tests/test-utils/productTestHelper.js
+const { create } = require('../../products'); // your product.js
 
-const productTestHelper = {
-  testProductIds: [],
-  testOrderIds: [],
+/**
+ * Create test products before tests
+ */
+async function setupTestData() {
+  console.log('Loading test products...');
 
-  async setupTestData() {
-    console.log('Loading test products...');
-    const data = await fs.readFile('data/full-products.json', 'utf-8');
-    const testProducts = JSON.parse(data);
+  const product1 = await create({
+    description: 'Product 1',
+    likes: 0,
+    urls: { regular: 'reg1.jpg', small: 'sm1.jpg', thumb: 'thumb1.jpg' },
+    links: { self: '/p1', html: '/p1/html' },
+    user: { id: 'u1', first_name: 'John', username: 'john' },
+    tags: [{ title: 'tag1' }],
+  });
 
-    for (const product of testProducts) {
-      if (!product.price) {
-        product.price = Math.floor(Math.random() * 100) + 1;
-      }
-      const createdProduct = await createProduct(product);
-      this.testProductIds.push(createdProduct.id); // Store the created product's ID
-    }
-    console.log('Test products loaded successfully');
-  },
+  const product2 = await create({
+    description: 'Product 2',
+    likes: 0,
+    urls: { regular: 'reg2.jpg', small: 'sm2.jpg', thumb: 'thumb2.jpg' },
+    links: { self: '/p2', html: '/p2/html' },
+    user: { id: 'u2', first_name: 'Jane', username: 'jane' },
+    tags: [{ title: 'tag2' }],
+  });
 
-  async cleanupTestData() {
-    console.log('Cleaning up test products...');
-    for (const productId of this.testProductIds) {
-      await destroy(productId);
-    }
+  const createdProducts = [product1, product2];
 
-    console.log('Cleaning up test orders...');
-    for (const orderId of this.testOrderIds) {
-      // Assuming an `orders.destroy` method exists. Otherwise, implement if needed.
-      await destroy(orderId);
-    }
+  console.log('Test products loaded successfully');
+  return createdProducts;
+}
 
-    console.log('Test products and orders cleaned up successfully');
-  },
+/**
+ * Clean up products after tests
+ */
+async function cleanupTestData() {
+  console.log('Cleaning up test products...');
+  const { Product } = require('../../products'); // import Product model
+  await Product.deleteMany({});
+  console.log('Test products cleaned up successfully');
+}
 
-  async createTestOrder() {
-    if (this.testProductIds.length === 0) {
-      throw new Error('No test products available. Run setupTestData() first.');
-    }
-
-    // Select a random number of products (up to 10)
-    const numProducts = Math.floor(Math.random() * 10) + 1;
-    const products = [];
-
-    for (let i = 0; i < numProducts; i++) {
-      const randomIndex = Math.floor(Math.random() * this.testProductIds.length);
-      products.push(this.testProductIds[randomIndex]);
-    }
-
-    // Create a new test order
-    const orderData = {
-      buyerEmail: `test${Date.now()}@example.com`,
-      products,
-    };
-
-    const createdOrder = await createOrder(orderData);
-    this.testOrderIds.push(createdOrder.id); // Store the created order's ID
-    return createdOrder;
-  },
-
-  async createTestOrders(count = 5) {
-    const orders = [];
-    for (let i = 0; i < count; i++) {
-      const order = await this.createTestOrder();
-      orders.push(order);
-    }
-    return orders;
-  },
+module.exports = {
+  setupTestData,
+  cleanupTestData,
 };
-
-module.exports = productTestHelper;
