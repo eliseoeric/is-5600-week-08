@@ -1,4 +1,7 @@
 const fs = require('fs/promises');
+require('../../products');  
+const db = require('../../db');                 // ✅ NEW
+const Product = db.model('Product');           // ✅ NEW
 const { create: createProduct, destroy } = require('../../products');
 const { create: createOrder } = require('../../orders');
 
@@ -8,6 +11,12 @@ const productTestHelper = {
 
   async setupTestData() {
     console.log('Loading test products...');
+
+    // ✅ KEY FIX: clear any existing products so we don't get duplicate _id errors
+    await Product.deleteMany({});
+    this.testProductIds = [];
+    this.testOrderIds = [];
+
     const data = await fs.readFile('data/full-products.json', 'utf-8');
     const testProducts = JSON.parse(data);
 
