@@ -1,5 +1,6 @@
+// jest.config.js
 module.exports = {
-  // Uncomment this when you begin testing w/in-memory database
-  // preset: '@shelf/jest-mongodb',
+  // Use in-memory MongoDB for tests
+  preset: '@shelf/jest-mongodb',
   testEnvironment: 'node',
 };
