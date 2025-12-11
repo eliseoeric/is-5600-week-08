@@ -72,3 +72,31 @@ const productTestHelper = {
 };
 
 module.exports = productTestHelper;
+mkdir -p tests/test-utils
+
+cat > tests/test-utils/productTestHelper.js << 'EOF'
+// tests/test-utils/productTestHelper.js
+// lightweight helper example. Adjust to match your app's data loader functions.
+const { ObjectId } = require('mongodb');
+const { create: createProduct } = require('../../products'); // if applicable
+
+async function setupTestData() {
+  // If your helper requires DB insertion, implement accordingly.
+  // For this lab we assume the real helper exists; this file is a placeholder.
+  return;
+}
+
+async function createTestOrders(n) {
+  return;
+}
+
+async function cleanupTestData() {
+  return;
+}
+
+module.exports = {
+  setupTestData,
+  createTestOrders,
+  cleanupTestData
+};
+EOF
