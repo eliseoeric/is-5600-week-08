@@ -1,74 +1,138 @@
 const fs = require('fs/promises');
-const { create: createProduct, destroy } = require('../../products');
-const { create: createOrder } = require('../../orders');
+const path = require('path');
+const Products = require('../../products'); 
+const Orders = require('../../orders');
+const db = require('../../db'); 
 
 const productTestHelper = {
-  testProductIds: [],
+  createdProducts: [],   
   testOrderIds: [],
-
   async setupTestData() {
-    console.log('Loading test products...');
-    const data = await fs.readFile('data/full-products.json', 'utf-8');
-    const testProducts = JSON.parse(data);
-
-    for (const product of testProducts) {
-      if (!product.price) {
-        product.price = Math.floor(Math.random() * 100) + 1;
+    try {
+      console.log('Loading test products...');
+      try {
+        if (db && typeof db.connect === 'function') {
+          await db.connect();
+        }
+      } catch (e) {
+        
       }
-      const createdProduct = await createProduct(product);
-      this.testProductIds.push(createdProduct.id); // Store the created product's ID
-    }
-    console.log('Test products loaded successfully');
-  },
+      try {
+        if (db && db.connection && db.connection.db) {
+          await db.connection.db.collection('products').deleteMany({});
+        }
+      } catch (err) {
 
+        console.warn('Warning: could not clear products collection before seeding:', err && err.message);
+      }
+      const jsonPath = path.join(process.cwd(), 'data', 'full-products.json');
+      const file = await fs.readFile(jsonPath, 'utf8');
+      const testProducts = JSON.parse(file);
+
+      this.createdProducts = [];
+
+      for (const product of testProducts) {
+      
+        if (!product.price) product.price = Math.floor(Math.random() * 100) + 1;
+
+        try {
+          const created = await Products.create(product);
+          const doc =
+            created && created._doc
+              ? created._doc
+              : typeof created.toObject === 'function'
+              ? created.toObject()
+              : created;
+
+          this.createdProducts.push(doc);
+        } catch (err) {
+          if (err && err.code === 11000) {         
+            continue;
+          }
+          console.warn('Failed creating product during seeding:', err && err.message ? err.message : err);
+        }
+      }
+
+      console.log('Test products loaded successfully. Count:', this.createdProducts.length);
+      return this.createdProducts;
+    } catch (err) {
+      console.error('Error in setupTestData:', err && err.message ? err.message : err);
+      throw err;
+    }
+  },
   async cleanupTestData() {
-    console.log('Cleaning up test products...');
-    for (const productId of this.testProductIds) {
-      await destroy(productId);
-    }
+    try {
+      console.log('Cleaning up test products and orders...');
 
-    console.log('Cleaning up test orders...');
-    for (const orderId of this.testOrderIds) {
-      // Assuming an `orders.destroy` method exists. Otherwise, implement if needed.
-      await destroy(orderId);
-    }
+      if (Array.isArray(this.createdProducts) && this.createdProducts.length) {
+        for (const p of this.createdProducts) {
+          const id = p._id || p.id;
+          try {
+            if (typeof Products.destroy === 'function') {
+              await Products.destroy(id);
+            } else if (Products && typeof Products.edit === 'function') {
+            }
+          } catch (e) {
+            console.warn('Warning: failed to remove product', id, e && e.message);
+          }
+        }
+      }
+      if (Array.isArray(this.testOrderIds) && this.testOrderIds.length) {
+        for (const oid of this.testOrderIds) {
+          try {
+            if (Orders && typeof Orders.destroy === 'function') {
+              await Orders.destroy(oid);
+            }
+          } catch (e) {
+            console.warn('Warning: failed to remove order', oid, e && e.message);
+          }
+        }
+      }
+      this.createdProducts = [];
+      this.testOrderIds = [];
 
-    console.log('Test products and orders cleaned up successfully');
+      console.log('Test products and orders cleaned up successfully');
+    } catch (err) {
+      console.error('Error in cleanupTestData:', err && err.message);
+      throw err;
+    }
   },
-
   async createTestOrder() {
-    if (this.testProductIds.length === 0) {
+    if (!this.createdProducts || this.createdProducts.length === 0) {
       throw new Error('No test products available. Run setupTestData() first.');
     }
 
-    // Select a random number of products (up to 10)
-    const numProducts = Math.floor(Math.random() * 10) + 1;
+    const numProducts = Math.floor(Math.random() * Math.min(10, this.createdProducts.length)) + 1;
     const products = [];
 
     for (let i = 0; i < numProducts; i++) {
-      const randomIndex = Math.floor(Math.random() * this.testProductIds.length);
-      products.push(this.testProductIds[randomIndex]);
+      const idx = Math.floor(Math.random() * this.createdProducts.length);
+      const pid = this.createdProducts[idx]._id || this.createdProducts[idx].id;
+      products.push(String(pid));
     }
 
-    // Create a new test order
     const orderData = {
       buyerEmail: `test${Date.now()}@example.com`,
       products,
+      status: 'pending'
     };
 
-    const createdOrder = await createOrder(orderData);
-    this.testOrderIds.push(createdOrder.id); // Store the created order's ID
+    const OrdersModule = Orders;
+    const createdOrder = await OrdersModule.create(orderData);
+
+    const id = createdOrder && (createdOrder._id || createdOrder.id || (createdOrder._doc && createdOrder._doc._id));
+    if (id) this.testOrderIds.push(String(id));
+
     return createdOrder;
   },
 
   async createTestOrders(count = 5) {
     const orders = [];
     for (let i = 0; i < count; i++) {
-      const order = await this.createTestOrder();
-      orders.push(order);
+      orders.push(await this.createTestOrder());
     }
     return orders;
-  },
+  }
 };
 
 module.exports = productTestHelper;

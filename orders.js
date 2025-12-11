@@ -1,91 +1,59 @@
-const cuid = require('cuid')
+const cuid = require('cuid');
+const db = require('./db'); 
+const Schema = db.Schema || require('mongoose').Schema;
 
-const db = require('./db')
 
-const Order = db.model('Order', {
+const OrderSchema = new Schema({
   _id: { type: String, default: cuid },
   buyerEmail: { type: String, required: true },
-  products: [{
-    type: String,
-    ref: 'Product', // ref will automatically fetch associated products for us
-    index: true,
-    required: true
-  }],
+  products: [{ type: String, required: true }],
   status: {
     type: String,
-    index: true,
-    default: 'CREATED',
-    enum: ['CREATED', 'PENDING', 'COMPLETED']
+    enum: ['pending', 'created', 'paid', 'shipped', 'delivered', 'cancelled'],
+    default: 'pending'
+  },
+}, { timestamps: true });
+
+const Order = (() => {
+  try {
+    return db.model('Order');
+  } catch (e) {
+    return db.model('Order', OrderSchema);
   }
-})
+})();
 
-async function list(options = {}) {
-  const { offset = 0, limit = 25, productId, status } = options;
 
-  const productQuery = productId ? {
-    products: productId
-  } : {}
-
-  const statusQuery = status ? {
-    status: status,
-  } : {}
-
-  const query = {
-    ...productQuery,
-    ...statusQuery
-  };
-
-  const orders = await Order.find(query)
-    .sort({ _id: 1 })
+async function list({ offset = 0, limit = 25 } = {}) {
+  return Order.find({})
     .skip(offset)
     .limit(limit)
-
-  return orders
+    .exec();
 }
 
 
-
-/**
- * Get an order
- * @param {Object} order
- * @returns {Promise<Object>}
- */
 async function get(_id) {
-  // using populate will automatically fetch the associated products.
-  // if you don't use populate, you will only get the product ids
-  const order = await Order.findById(_id)
-    .populate('products')
-    .exec()
-
-  return order
+  return Order.findById(_id).exec();
 }
-
-async function edit(_id, change) {
-  const order = await get(_id)
-
-  Object.keys(change).forEach(function(key) {
-    order[key] = change[key]
-  })
-
-  await order.save()
-
-  return order
-}
-
-/**
- * Create an order
- * @param {Object} order
- * @returns {Promise<Object>}
- */
 async function create(fields) {
-  const order = await new Order(fields).save()
-  await order.populate('products')
-  return order
+  const doc = {
+    buyerEmail: fields.buyerEmail,
+    products: fields.products || [],
+    status: fields.status || 'pending'
+  };
+
+  return Order.create(doc);
+}
+async function edit(_id, change) {
+  return Order.findByIdAndUpdate(_id, change, { new: true }).exec();
+}
+async function destroy(_id) {
+  return Order.findByIdAndDelete(_id).exec();
 }
 
 module.exports = {
-  create,
-  get,
   list,
-  edit
-}
+  get,
+  create,
+  edit,
+  destroy
+};
