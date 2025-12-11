@@ -34,8 +34,11 @@ app.put('/orders/:id', api.editOrder)
 
 /**
  * Boot the server.
- * Note that we are exporting the server as well, 
- * so we can use it during our testing
+ * Note that we are exporting the app for testing.
+ * In production, the server will start when this module is required.
  */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+if (require.main === module) {
+  app.listen(port, () => console.log(`Server listening on port ${port}`))
+}
 
+module.exports = app
