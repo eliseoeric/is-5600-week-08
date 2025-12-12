@@ -10,32 +10,33 @@ const port = process.env.PORT || 3000
 const app = express()
 
 // Register the public directory
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'))
 
-// register the routes
+// Register middleware
 app.use(bodyParser.json())
 app.use(middleware.cors)
 
-// Register root route
+// Register routes
 app.get('/', api.handleRoot)
 
-// Register Products routes
+// Products routes
 app.get('/products', api.listProducts)
 app.get('/products/:id', api.getProduct)
+app.post('/products', api.createProduct)
 app.put('/products/:id', api.editProduct)
 app.delete('/products/:id', api.deleteProduct)
-app.post('/products', api.createProduct)
 
-// Register Order Routes
+// Orders routes
 app.get('/orders', api.listOrders)
 app.post('/orders', api.createOrder)
-// edit and delete routes
 app.put('/orders/:id', api.editOrder)
 
-/**
- * Boot the server.
- * Note that we are exporting the server as well, 
- * so we can use it during our testing
- */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+// Start server ONLY if not testing
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () =>
+    console.log(`Server listening on port ${port}`)
+  )
+}
 
+// Export app for testing
+module.exports = app
