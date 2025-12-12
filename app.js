@@ -1,3 +1,5 @@
+// app.js (FINAL CORRECTED CODE)
+
 const express = require('express')
 const api = require('./api')
 const middleware = require('./middleware')
@@ -33,9 +35,15 @@ app.post('/orders', api.createOrder)
 app.put('/orders/:id', api.editOrder)
 
 /**
- * Boot the server.
- * Note that we are exporting the server as well, 
- * so we can use it during our testing
+ * Export the Express app object for testing purposes.
  */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+module.exports = app;
 
+/**
+ * Boot the server only if the file is run directly (not imported by a test).
+ */
+if (require.main === module) {
+    app.listen(port, () => {
+        console.log(`Server listening on port ${port}`)
+    });
+}
