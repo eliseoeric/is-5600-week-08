@@ -1,13 +1,10 @@
 module.exports = {
   mongodbMemoryServerOptions: {
     binary: {
-      version: '7.0.3',
-      skipMD5: true,
+      version: '7.0.3' // REQUIRED for Debian 12 (Codespaces)
     },
     instance: {
-      dbName: 'jest',
-    },
-    autoStart: false,
-  },
-  mongoURLEnvName: 'MONGODB_URI',
+      dbName: 'jest'
+    }
+  }
 };

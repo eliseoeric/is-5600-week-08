@@ -1,12 +1,14 @@
-// db.js
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://root:example@db:27017/?authSource=admin',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  }
-);
+const mongoUri =
+  process.env.MONGO_URL || // provided by @shelf/jest-mongodb
+  'mongodb://127.0.0.1:27017/fullstack_prints';
 
-module.exports = mongoose
+mongoose.set('strictQuery', false);
+
+mongoose.connect(mongoUri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+module.exports = mongoose;
