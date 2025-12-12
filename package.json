@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand --forceExit",
+    "test": "TMPDIR=.tmp MONGOMS_TMPDIR=.tmp MONGOMS_DOWNLOAD_DIR=.mongodb-binaries jest --runInBand --forceExit",
     "test:watch": "nodemon --exec 'npm test' --watch './**/*.js' --watch './**/*.json'"
   },
   "keywords": [],
