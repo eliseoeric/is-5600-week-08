@@ -1,13 +1,12 @@
+// jest-mongodb-config.js
 module.exports = {
   mongodbMemoryServerOptions: {
+    instance: { dbName: 'jest' },
     binary: {
-      version: '7.0.3',
-      skipMD5: true,
+      // If you hit binary download issues, try swapping to '6.0.13' or '7.0.14'
+      version: '7.0.14',
+      skipMD5: true
     },
-    instance: {
-      dbName: 'jest',
-    },
-    autoStart: false,
-  },
-  mongoURLEnvName: 'MONGODB_URI',
+    autoStart: false
+  }
 };
