@@ -1,6 +1,6 @@
 const path = require('path')
-const Products = require('./products')
-const Orders = require('./orders')
+const Products = require('./products.test')
+const Orders = require('./orders.test')
 const autoCatch = require('./lib/auto-catch')
 
 /**

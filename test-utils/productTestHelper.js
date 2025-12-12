@@ -1,5 +1,5 @@
 const fs = require('fs/promises');
-const { create, destroy } = require('../products');
+const { create, destroy } = require('../products.test');
 
 const productTestHelper = {
   testProductIds: [],
