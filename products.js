@@ -91,3 +91,4 @@ module.exports = {
   destroy,
   get
 }
+module.exports.remove = module.exports.destroy;
