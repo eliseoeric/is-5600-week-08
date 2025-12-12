@@ -1,45 +1,66 @@
-const mockProducts = [
-    { description: 'Product 1' },
-    { description: 'Product 2' }
-];
+ 
+ const { create, get, list, edit } = require('../orders');
+const orderData = require('../data/order1.json');
+const productTestHelper = require('./test-utils/productTestHelper');
 
-/**
- * Mock Mongoose Query object.
- * This simulates Mongoose's chainable query interface.
- * For example, in real Mongoose you can do: Model.find().sort().skip().limit()
- * 
- * mockReturnThis() is used to make methods chainable by returning 'this'
- * exec() and then() both resolve with our mockProducts to simulate a DB response
- */
-const mockQuery = {
-    sort: jest.fn().mockReturnThis(),  // Returns 'this' to allow chaining
-    skip: jest.fn().mockReturnThis(),  // Returns 'this' to allow chaining
-    limit: jest.fn().mockReturnThis(), // Returns 'this' to allow chaining
-    exec: jest.fn().mockResolvedValue(mockProducts),  // Simulates DB query execution
-    then: function(resolve) { resolve(mockProducts) }  // Makes the query thenable (Promise-like)
-};
+describe('Orders Module', () => {
+  let createdProduct;
+  let createdOrder;
 
-/**
- * Mock Mongoose Model object.
- * This simulates the methods available on a Mongoose model (e.g., Product model).
- * The find() method returns our mockQuery to allow for method chaining.
- */
-const mockModel = {
-    find: jest.fn().mockReturnValue(mockQuery)
-};
+  // Populate the database with dummy data
+  beforeAll(async () => {
+    await productTestHelper.setupTestData();
+    await productTestHelper.createTestOrders(5);
+  });
 
-/**
- * Mock DB object that simulates the mongoose db interface.
- * In real code, we use db.model('Product') to get the Product model.
- * Here, we return our mockModel whenever model() is called.
- */
-const mockDb = {
-    model: jest.fn().mockReturnValue(mockModel)
-};
+  afterAll(async () => {
+    await productTestHelper.cleanupTestData();
+  });
 
-module.exports = {
-    mockDb,        
-    mockProducts, 
-    mockModel,     
-    mockQuery     
-};
+  describe('list', () => {
+    it('should list orders', async () => {
+      const orders = await list();
+      expect(orders.length).toBeGreaterThan(4);
+    });
+  });
+
+  describe('create', () => {
+    it('should create an order', async () => {
+      createdOrder = await create(orderData);
+      expect(createdOrder).toBeDefined();
+      expect(createdOrder.buyerEmail).toBe(orderData.buyerEmail);
+    });
+  });
+
+  // Task 1: Add "get" test to orders
+  describe('get', () => {
+    it('should retrieve an order by id', async () => {
+      // Get the order using the createdOrder._id
+      const order = await get(createdOrder._id);
+
+      // Assertions
+      expect(order).toBeDefined();
+      expect(order._id).toBe(createdOrder._id);
+      expect(order.buyerEmail).toBe(orderData.buyerEmail);
+    });
+  });
+
+  // Task 2: Add "edit" test to orders
+  describe('edit', () => {
+    it('should edit an order', async () => {
+      // Create a change on the order
+      const change = {
+        status: 'COMPLETED'
+      };
+
+      // Call the edit method
+      const editedOrder = await edit(createdOrder._id, change);
+
+      // Assertions
+      expect(editedOrder).toBeDefined();
+      expect(editedOrder._id).toBe(createdOrder._id);
+      expect(editedOrder.status).toBe('COMPLETED');
+      expect(editedOrder.status).not.toBe(createdOrder.status);
+    });
+  });
+});

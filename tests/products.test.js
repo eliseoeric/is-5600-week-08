@@ -1,3 +1,4 @@
+
 const { mockDb, mockProducts, mockModel } = require('./db.mock');
 const { list, get, destroy } = require('../products');
 
