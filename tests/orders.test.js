@@ -1,0 +1,20 @@
+describe('get', () => {
+  it('should get an order by id', async () => {
+    const order = await get(createdOrder._id);
+
+    expect(order).toBeDefined();
+    expect(order._id.toString()).toBe(createdOrder._id.toString());
+  });
+});
+describe('edit', () => {
+  it('should edit an order', async () => {
+    const change = {
+      buyerEmail: 'updatedemail@test.com'
+    };
+
+    const editedOrder = await edit(createdOrder._id, change);
+
+    expect(editedOrder).toBeDefined();
+    expect(editedOrder.buyerEmail).toBe(change.buyerEmail);
+  });
+});
