@@ -4,7 +4,8 @@ const middleware = require('./middleware')
 const bodyParser = require('body-parser')
 
 // Set the port
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
+const host = '0.0.0.0'
 
 // Boot the app
 const app = express()
@@ -37,5 +38,5 @@ app.put('/orders/:id', api.editOrder)
  * Note that we are exporting the server as well, 
  * so we can use it during our testing
  */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+module.exports = app.listen(port, host, () => console.log(`Server listening on ${host}:${port}`))
 
