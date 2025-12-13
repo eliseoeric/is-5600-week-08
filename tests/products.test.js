@@ -1,16 +1,39 @@
-const { mockDb, mockProducts, mockModel } = require('./db.mock');
+const { mockDb, mockProducts, mockModel } = require('./db.mock.js');
 const { list, get, destroy } = require('../products');
 
+// Use our mock DB
 jest.mock('../db', () => mockDb);
-describe('get', () => {
-  it('should get a product by id', async () => {
-    mockModel.findById = jest
-      .fn()
-      .mockResolvedValue({ description: 'Product 1' });
 
-    const product = await get('test-id');
+describe('Product Module', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    expect(product).toBeDefined();
-    expect(product.description).toBe('Product 1');
+  describe('list', () => {
+    it('should list products', async () => {
+      const products = await list();
+      expect(products.length).toBe(2);
+      expect(products[0].description).toBe('Product 1');
+      expect(products[1].description).toBe('Product 2');
+    });
+  });
+
+  describe('get', () => {
+    it('should get a product by id', async () => {
+      mockModel.findById = jest.fn().mockResolvedValue({ description: 'Product 1' });
+
+      const product = await get('test-id');
+      expect(product).toBeDefined();
+      expect(product.description).toBe('Product 1');
+    });
+  });
+
+  describe('destroy', () => {
+    it('should delete a product', async () => {
+      mockModel.deleteOne = jest.fn().mockResolvedValue({ deletedCount: 1 });
+
+      const result = await destroy('test-id');
+      expect(result.deletedCount).toBe(1);
+    });
   });
 });
