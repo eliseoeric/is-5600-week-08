@@ -38,4 +38,25 @@ app.put('/orders/:id', api.editOrder)
  * so we can use it during our testing
  */
 module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+const request = require('supertest');
+const app = require('../app');
+
+describe('Express Server Smoke Tests', () => {
+
+  test('GET / should return 200', async () => {
+    const res = await request(app).get('/');
+    expect(res.statusCode).toBe(200);
+  });
+
+  test('GET /products should return 200', async () => {
+    const res = await request(app).get('/products');
+    expect(res.statusCode).toBe(200);
+  });
+
+  test('GET /orders should return 200', async () => {
+    const res = await request(app).get('/orders');
+    expect(res.statusCode).toBe(200);
+  });
+
+});
 
