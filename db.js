@@ -1,12 +1,15 @@
-// db.js
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
-mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://root:example@db:27017/?authSource=admin',
-  {
+async function connect() {
+  await mongoose.connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true
-  }
-);
+  });
+}
 
-module.exports = mongoose
+async function close() {
+  await mongoose.connection.dropDatabase();
+  await mongoose.connection.close();
+}
+
+module.exports = { connect, close };
