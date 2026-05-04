@@ -35,9 +35,9 @@ app.put('/orders/:id', api.editOrder)
 /**
  * Boot the server.
  * When app.js is run directly, start listening.
- * When imported in tests, export the app instance only.
+ * During tests, do not start the server.
  */
-if (require.main === module) {
+if (require.main === module && process.env.NODE_ENV !== 'test') {
   app.listen(port, () => console.log(`Server listening on port ${port}`))
 }
 
