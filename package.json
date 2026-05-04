@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand --forceExit",
-    "test:watch": "nodemon --exec 'npm test' --watch './**/*.js' --watch './**/*.json'"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "NODE_ENV=test jest --runInBand --forceExit",
+    "test:integration": "NODE_ENV=test jest --runInBand",
+    "test:watch": "NODE_ENV=test nodemon --exec 'npm test' --watch './**/*.js' --watch './**/*.json'"
   },
   "keywords": [],
   "author": "",
