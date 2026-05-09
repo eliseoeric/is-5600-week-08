@@ -16,7 +16,7 @@ const productTestHelper = {
         product.price = Math.floor(Math.random() * 100) + 1;
       }
       const createdProduct = await createProduct(product);
-      this.testProductIds.push(createdProduct.id); // Store the created product's ID
+      this.testProductIds.push(createdProduct._id); // Store the created product's ID
     }
     console.log('Test products loaded successfully');
   },
@@ -57,7 +57,7 @@ const productTestHelper = {
     };
 
     const createdOrder = await createOrder(orderData);
-    this.testOrderIds.push(createdOrder.id); // Store the created order's ID
+    this.testOrderIds.push(createdOrder._id); // Store the created order's ID
     return createdOrder;
   },
 

@@ -1,8 +1,10 @@
 const fs = require('fs/promises');
 const { create, destroy } = require('../products');
+const { create: createOrder, get: getOrder } = require('../orders');
 
 const productTestHelper = {
   testProductIds: [],
+  testOrderIds: [],
 
   async setupTestData() {
     console.log('Loading test products...');
@@ -14,9 +16,23 @@ const productTestHelper = {
         product.price = Math.floor(Math.random() * 100) + 1;
       }
       const createdProduct = await create(product);
-      this.testProductIds.push(createdProduct.id); // Store the created product's ID
+      this.testProductIds.push(createdProduct._id); // Store the created product's ID
     }
     console.log('Test products loaded successfully');
+  },
+
+  async createTestOrders(count) {
+    console.log(`Creating ${count} test orders...`);
+    for (let i = 0; i < count; i++) {
+      const orderData = {
+        buyerEmail: `test${i}@example.com`,
+        products: [this.testProductIds[0]],
+        status: 'CREATED'
+      };
+      const createdOrder = await createOrder(orderData);
+      this.testOrderIds.push(createdOrder._id);
+    }
+    console.log('Test orders created successfully');
   },
 
   async cleanupTestData() {
