@@ -1,113 +1,49 @@
-const path = require('path')
-const Products = require('./products')
-const Orders = require('./orders')
-const autoCatch = require('./lib/auto-catch')
+const express = require("express")
+const cors = require("cors")
 
-/**
- * Handle the root route
- * @param {object} req
- * @param {object} res
-*/
-function handleRoot(req, res) {
-  res.sendFile(path.join(__dirname, '/index.html'));
-}
+const app = express()
 
-/**
- * List all products
- * @param {object} req
- * @param {object} res
- */
-async function listProducts(req, res) {
-  // Extract the limit and offset query parameters
-  const { offset = 0, limit = 25, tag } = req.query
-  // Pass the limit and offset to the Products service
-  res.json(await Products.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    tag
-  }))
-}
+app.use(cors())
+app.use(express.json())
 
+// ================= TEMP DATA =================
 
-/**
- * Get a single product
- * @param {object} req
- * @param {object} res
- */
-async function getProduct(req, res, next) {
-  const { id } = req.params
+let products = [
+  { id: 1, name: "Laptop", price: 1000 },
+  { id: 2, name: "Phone", price: 500 },
+  { id: 3, name: "Shoes", price: 120 }
+]
 
-  const product = await Products.get(id)
-  if (!product) {
-    return next()
+let orders = []
+
+// ================= ROUTES =================
+
+// HOME
+app.get("/", (req, res) => {
+  res.json({ message: "API running" })
+})
+
+// PRODUCTS
+app.get("/products", (req, res) => {
+  res.json(products)
+})
+
+// ORDERS
+app.get("/orders", (req, res) => {
+  res.json(orders)
+})
+
+// CREATE ORDER
+app.post("/orders", (req, res) => {
+
+  const newOrder = {
+    id: orders.length + 1,
+    items: req.body.items || []
   }
 
-  return res.json(product)
-}
+  orders.push(newOrder)
 
-/**
- * Create a product
- * @param {object} req 
- * @param {object} res 
- */
-async function createProduct(req, res) {
-  console.log('request body:', req.body)
-  res.json(req.body)
-}
+  res.json(newOrder)
+})
 
-/**
- * Edit a product
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-async function editProduct(req, res, next) {
-  console.log(req.body)
-  res.json(req.body)
-}
-
-/**
- * Delete a product
- * @param {*} req 
- * @param {*} res 
- * @param {*} next 
- */
-async function deleteProduct(req, res, next) {
-  res.json({ success: true })
-}
-
-async function createOrder(req, res, next) {
-  const order = await Orders.create(req.body)
-  res.json(order)
-}
-
-async function listOrders(req, res, next) {
-  const { offset = 0, limit = 25, productId, status } = req.query
-
-  const orders = await Orders.list({
-    offset: Number(offset),
-    limit: Number(limit),
-    productId,
-    status
-  })
-
-  res.json(orders)
-}
-
-async function editOrder(req, res, next) {
-  const change = req.body
-  const order = await Orders.edit(req.params.id, change)
-  res.json(order)
-}
-
-module.exports = autoCatch({
-  handleRoot,
-  listProducts,
-  getProduct,
-  createProduct,
-  editProduct,
-  deleteProduct,
-  createOrder,
-  listOrders,
-  editOrder,
-});
+module.exports = app
