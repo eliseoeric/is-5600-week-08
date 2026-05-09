@@ -1,5 +1,8 @@
 module.exports = {
-  // Uncomment this when you begin testing w/in-memory database
-  // preset: '@shelf/jest-mongodb',
   testEnvironment: 'node',
+  testMatch: ['**/tests/**/*.test.js'],
+  verbose: true,
+  forceExit: true,
+  clearMocks: true,
+  testTimeout: 30000
 };
