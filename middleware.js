@@ -1,53 +1,39 @@
-/**
- * Set the CORS headers on the response object
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function cors(req, res, next) {
-  const origin = req.headers.origin
+// Logger middleware
+const logger = (req, res, next) => {
+  console.log(`${req.method} ${req.url} - ${new Date().toISOString()}`);
+  next();
+};
 
-  // Set the CORS headers
-  res.setHeader('Access-Control-Allow-Origin', origin || '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PUT, DELETE, OPTIONS, XMODIFY')
-  res.setHeader('Access-Control-Allow-Credentials', true)
-  res.setHeader('Access-Control-Max-Age', '86400')
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept')
-
-  next()
-}
-
-/**
- * Handle errors
- * @param {object} err
- * @param {object} req
- * @param {object} res
- * @param {function} next
- */
-function handleError(err, req, res, next) {
-  // Log the error to our server's console
-  console.error(err)
-
-  // If the response has already been sent, we can't send another response
-  if (res.headersSent) {
-    return next(err)
+// Validate product middleware
+const validateProduct = (req, res, next) => {
+  const { name, price, category } = req.body;
+  
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ error: 'Product name is required' });
   }
+  
+  if (price === undefined || price < 0) {
+    return res.status(400).json({ error: 'Price must be a positive number' });
+  }
+  
+  if (!category || category.trim() === '') {
+    return res.status(400).json({ error: 'Category is required' });
+  }
+  
+  next();
+};
 
-  // Send a 500 error response
-  res.status(500).json({ error: "Internal Error Occurred" })
-}
+// Error handler middleware
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  
+  if (err.status === 404) {
+    return res.status(404).json({ error: err.message });
+  }
+  
+  res.status(err.status || 500).json({ 
+    error: err.message || 'Internal Server Error' 
+  });
+};
 
-/**
- * Send a 404 response if no route is found
- * @param {object} req
- * @param {object} res
- */
-function notFound(req, res) {
-  res.status(404).json({ error: "Not Found" })
-}
-
-module.exports = {
-  cors,
-  handleError,
-  notFound
-}
+module.exports = { logger, validateProduct, errorHandler };

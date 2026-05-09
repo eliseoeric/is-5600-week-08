@@ -1,12 +1,20 @@
-// db.js
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://root:example@db:27017/?authSource=admin',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const connectDB = async () => {
+  try {
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/fullstack-prints';
+    await mongoose.connect(uri);
+    console.log('✅ MongoDB connected successfully');
+    return mongoose.connection;
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error);
+    throw error;
   }
-);
+};
 
-module.exports = mongoose
+const disconnectDB = async () => {
+  await mongoose.disconnect();
+  console.log('MongoDB disconnected');
+};
+
+module.exports = { connectDB, disconnectDB };
