@@ -3,9 +3,6 @@ const api = require('./api')
 const middleware = require('./middleware')
 const bodyParser = require('body-parser')
 
-// Set the port
-const port = process.env.PORT || 3000
-
 // Boot the app
 const app = express()
 
@@ -32,10 +29,11 @@ app.post('/orders', api.createOrder)
 // edit and delete routes
 app.put('/orders/:id', api.editOrder)
 
-/**
- * Boot the server.
- * Note that we are exporting the server as well, 
- * so we can use it during our testing
- */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+// Export the Express app for testing
+module.exports = app
+
+if (require.main === module) {
+  const port = process.env.PORT || 3000
+  app.listen(port, () => console.log(`Server listening on port ${port}`))
+}
 
