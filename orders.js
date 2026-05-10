@@ -83,9 +83,15 @@ async function create(fields) {
   return order
 }
 
+async function destroy(_id) {
+  return await Order.deleteOne({ _id })
+}
+
+
 module.exports = {
   create,
   get,
   list,
-  edit
+  edit,
+  destroy
 }
