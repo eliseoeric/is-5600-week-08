@@ -15,6 +15,8 @@ const productTestHelper = {
       if (!product.price) {
         product.price = Math.floor(Math.random() * 100) + 1;
       }
+      // Remove id to avoid duplicate _id
+      delete product.id;
       const createdProduct = await createProduct(product);
       this.testProductIds.push(createdProduct.id); // Store the created product's ID
     }
