@@ -483,7 +483,6 @@ Once you’ve completed the assignment, it’s time to submit your work. You’l
    - Click "Create pull request" to submit your work for review. Your instructor will be notified and can review your work.
 
 And that’s it! You’ve now completed your first lab assignment using GitHub and Codespaces. Well done!
-
 ### Additional Steps
 
 1. Open the terminal in Codespaces.
