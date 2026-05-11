@@ -1,8 +1,10 @@
 // db.js
 const mongoose = require('mongoose')
 
+const uri = process.env.MONGODB_URI || process.env.MONGO_URL || 'mongodb://root:example@db:27017/?authSource=admin'
+
 mongoose.connect(
-  process.env.MONGODB_URI || 'mongodb://root:example@db:27017/?authSource=admin',
+  uri,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
