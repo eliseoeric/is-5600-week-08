@@ -20,5 +20,13 @@ describe('The Express Server', () => {
       .get('/products')
     expect(res.statusCode).toEqual(200);
   });
+
+   test('should respond at /orders', async () => {
+    const res = await request(app)
+      .get('/orders');
+
+    expect(res.statusCode).toEqual(200);
+  });
+
 });
 });
