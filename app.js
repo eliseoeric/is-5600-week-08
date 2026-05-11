@@ -37,5 +37,13 @@ app.put('/orders/:id', api.editOrder)
  * Note that we are exporting the server as well, 
  * so we can use it during our testing
  */
-module.exports = app.listen(port, () => console.log(`Server listening on port ${port}`))
+let server;
+
+if (process.env.NODE_ENV !== 'test') {
+  server = app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+}
+
+module.exports = app;
 
